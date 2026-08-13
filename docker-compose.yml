@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: .
+    container_name: todo-backend
+
+    command: python core/manage.py runserver 0.0.0.0:8000
+
+    ports:
+      - "8001:8000"
+
+    volumes:
+      - .:/app
+
+    restart: unless-stopped
+    
+    environment:
+      - SECRET_KEY=dev-secret-key-change-later
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1
