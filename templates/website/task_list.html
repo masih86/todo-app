@@ -11,7 +11,8 @@
     <h1>task website</h1>
     <ul>
         {% for task in tasks %}
-        <li>{{ task.title }} - {{ task.content }} - <a href="{% url 'website:task-detail' pk=task.id %}">{{ task.id }}</a></li> <a href="#">Edit</a>
+        <li>{{ task.title }} - {{ task.content }} - <a href="{% url 'website:task-detail' pk=task.id %}">{{ task.id }}</a></li>
+         <a href="{% url 'website:task-edit' pk=task.id %}">Edit</a>
         <a href="{% url 'website:task-delete' pk=task.id %}">Delete</a>
         {% empty %}
         <li>Not yet.</li>
