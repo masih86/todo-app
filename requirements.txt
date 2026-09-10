@@ -1,6 +1,9 @@
 Django==6.0.6
+djangorestframework==3.16.0
 python-decouple==3.8
 psycopg2-binary==2.9.9
-
+pillow==12.3.0
 flake8
 black
+drf-yasg[validation]
+djangorestframework-simplejwt

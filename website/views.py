@@ -1,12 +1,7 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
-from django.views.generic.base import RedirectView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import FormView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.mixins import PermissionRequiredMixin
 
 from .models import Task
 from .forms import TaskForm
