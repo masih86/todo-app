@@ -28,6 +28,15 @@ class UserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser):
+    
+    
+    class Role(models.TextChoices):
+        ADMIN = "admin", "Admin"
+        TEACHER = "teacher", "Teacher"
+        STUDENT = "student", "Student"
+        
+        
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.STUDENT)
     email = models.EmailField(unique=True, null=False, blank=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)

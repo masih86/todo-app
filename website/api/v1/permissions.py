@@ -16,11 +16,17 @@ class IsWithin24HoursAndNotDone(permissions.BasePermission):
         return True   
     
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+class IsOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
-            return True
-        if request.method in permissions.SAFE_METHODS:
+        if request.user.role in [request.user.Role.ADMIN, request.user.Role.TEACHER]:
             return True
         return obj.author == request.user
+    
+    
+class IsAdminOrTeacher(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role in [request.user.Role.ADMIN, request.user.Role.TEACHER]
+        )

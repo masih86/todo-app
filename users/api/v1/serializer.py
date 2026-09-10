@@ -16,8 +16,8 @@ class AdminUserSerializer(ModelSerializer):
     
     class Meta:
         model = CustomUser
-        fields = ['id','email','username', 'is_active', 'is_staff', 'is_superuser', 'first_name', 'last_name', 'created_date', 'updated_date']
-        read_only_fields = ['id', 'created_date', 'updated_date']
+        fields = ['id','email','username', 'is_active', 'is_staff', 'is_superuser', 'first_name', 'last_name', 'created_date', 'updated_date', 'role']
+        read_only_fields = ['id', 'created_date', 'updated_date', 'role']
 
 class RegistrationSerializer(ModelSerializer):
     password = serializers.CharField(max_length=255, min_length=8, write_only=True)
