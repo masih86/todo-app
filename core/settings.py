@@ -94,7 +94,8 @@ DATABASES = {
         "PORT": config("POSTGRES_PORT"),
     }
 }
-
+REDIS_HOST = config("REDIS_HOST", default="localhost")
+REDIS_PORT = config("REDIS_PORT", default=6379, cast=int)
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
