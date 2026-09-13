@@ -26,6 +26,17 @@ services:
     volumes:
       - redis_data:/data
 
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: todo-redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+
   backend:
     build: .
     container_name: todo-backend
@@ -52,3 +63,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  redisinsight_data:
