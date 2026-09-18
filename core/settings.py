@@ -153,9 +153,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'burst': '60/min',
-        'sustained': '1000/day'
+        'sustained': '1000/day',
+        'resend_verification': '3/hour',
     }
 }
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
@@ -175,3 +177,17 @@ CACHES = {
     }
 }
 DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
+
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/2"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/2"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@todoapp.local"
+BACKEND_URL = config("BACKEND_URL", default="http://localhost:8001")
+
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'

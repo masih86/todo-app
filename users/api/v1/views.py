@@ -7,7 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-
+from django.core.cache import cache
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.throttling import ScopedRateThrottle
 from .serializer import *
 
 
@@ -65,3 +67,80 @@ class LogoutView(APIView):
                 {"detail": "invalid token"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        token = request.query_params.get('token')
+
+        if not token:
+            return Response(
+                {"detail": "token not sent "},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cache_key = f"email_verify:{token}"
+        user_id = cache.get(cache_key)
+
+        if user_id is None:
+            return Response(
+                {"detail": " the link is invalid or expired "},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"detail": " user not found "},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.is_active = True
+        user.save()
+
+        cache.delete(cache_key)
+
+        return Response(
+            {"detail": " account successfully activated "},
+            status=status.HTTP_200_OK
+        )
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+    
+    
+    
+class ResendVerificationEmailView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'resend_verification'
+
+    def post(self, request):
+        serializer = ResendVerificationEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
+        user = CustomUser.objects.filter(email=email).first()
+
+        generic_response = Response(
+            {"detail": "if an account with this email exists, a verification link has been sent"},
+            status=status.HTTP_200_OK
+        )
+
+        if user is None:
+            return generic_response
+
+        if user.is_active:
+            return Response(
+                {"detail": "this account is already verified"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        token = generate_verification_token(user.id)
+        send_verification_email_task.delay(user.email, token)
+
+        return generic_response

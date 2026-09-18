@@ -3,7 +3,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-
+from ..utils import generate_verification_token
+from ...tasks import send_verification_email_task
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
 
 class CustomUserSerializer(ModelSerializer):
     
@@ -39,9 +42,29 @@ class RegistrationSerializer(ModelSerializer):
                 {"password": list(e.messages)})
         return super().validate(attrs)
 
+
     def create(self, validated_data):
         validated_data.pop("password1", None)
-        return CustomUser.objects.create_user(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
+
+        token = generate_verification_token(user.id)
+        send_verification_email_task.delay(user.email, token)
+        return user
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        email = attrs.get(self.username_field)
+        password = attrs.get("password")
+
+        user = CustomUser.objects.filter(email=email).first()
+
+        if user is not None and user.check_password(password) and not user.is_active:
+            raise AuthenticationFailed(
+                {"detail": "please verify your email before logging in"}
+            )
+
+        return super().validate(attrs)
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -68,3 +91,7 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"new_password": list(e.messages)})
         return super().validate(attrs)
+    
+    
+class ResendVerificationEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()

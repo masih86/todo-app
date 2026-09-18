@@ -11,6 +11,7 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+        extra_fields.setdefault("is_active", False)
         user.save()
         return user
 
@@ -40,7 +41,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, null=False, blank=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
 

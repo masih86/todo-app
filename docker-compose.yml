@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: todo-db
+    container_name: db
     restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -19,7 +19,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: todo-redis
+    container_name: redis-cache
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -54,6 +54,20 @@ services:
     env_file:
       - .env
 
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  celery_worker:
+    build: .
+    container_name: celery-worker
+    command: celery -A core worker -l INFO --concurrency=2
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
