@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 
-@shared_task
+@shared_task(name='send_verification_email_task')
 def send_verification_email_task(user_email: str, token: str):
     verification_link = f"{settings.BACKEND_URL}/users/api/v1/verify-email/?token={token}"
 
