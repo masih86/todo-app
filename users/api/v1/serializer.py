@@ -74,11 +74,11 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password1 = serializers.CharField(required=True)
 
 
-    def validate_old_password(self, value):
-        user = self.context['request'].user
-        if not user.check_password(value):  # <-- اینجا استفاده می‌شه
-            raise serializers.ValidationError("old password is wrong")
-        return value
+    # def validate_old_password(self, value):
+    #     user = self.context['request'].user
+    #     if not user.check_password(value):  # <-- اینجا استفاده می‌شه
+    #         raise serializers.ValidationError("old password is wrong")
+    #     return value
     
     
     def validate(self, attrs):

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -191,3 +192,12 @@ BACKEND_URL = config("BACKEND_URL", default="http://localhost:8001")
 
 # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 # EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+UNVERIFIED_USER_RETENTION = timedelta(days=3)
+
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-expired-items": {
+        "task": "cleanup_expired_items",
+        "schedule": crontab(minute="*/10"),
+        "options": {"expires": 540},
+    },
+}
